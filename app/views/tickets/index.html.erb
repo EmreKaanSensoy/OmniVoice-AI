@@ -1,0 +1,158 @@
+<% content_for :title, "Biletler - Zendesk Support" %>
+
+<div style="display:flex; height: 100%; overflow: hidden;">
+  <!-- Left Views Sub-Navigation (Classic Zendesk Views) -->
+  <aside style="width: 250px; border-right: 1px solid var(--bg-card-border); background: rgba(15, 23, 42, 0.4); padding: 20px 14px; overflow-y: auto; flex-shrink: 0;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 16px; padding: 0 8px;">
+      <h3 style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-dim); font-weight: 700;">Görünümler</h3>
+      <a href="<%= new_ticket_path %>" style="color: var(--azure-glow); text-decoration:none; font-size: 0.8rem; font-weight: 700;">+ Yeni</a>
+    </div>
+
+    <nav style="display:flex; flex-direction:column; gap: 4px;">
+      <a href="<%= tickets_path(view: 'unresolved') %>" style="display:flex; align-items:center; justify-content:space-between; padding: 8px 12px; border-radius: var(--radius-md); text-decoration:none; font-size: 0.85rem; font-weight: 500; color: <%= @view == 'unresolved' ? 'var(--azure-glow)' : 'var(--text-muted)' %>; background: <%= @view == 'unresolved' ? 'rgba(0, 120, 212, 0.15)' : 'transparent' %>;">
+        <span>Çözülmemiş Biletler</span>
+        <span style="font-size: 0.72rem; padding: 1px 6px; border-radius: var(--radius-full); background: rgba(255,255,255,0.06); font-family: var(--font-mono);"><%= @counts[:unresolved] %></span>
+      </a>
+
+      <a href="<%= tickets_path(view: 'my_tickets') %>" style="display:flex; align-items:center; justify-content:space-between; padding: 8px 12px; border-radius: var(--radius-md); text-decoration:none; font-size: 0.85rem; font-weight: 500; color: <%= @view == 'my_tickets' ? 'var(--azure-glow)' : 'var(--text-muted)' %>; background: <%= @view == 'my_tickets' ? 'rgba(0, 120, 212, 0.15)' : 'transparent' %>;">
+        <span>Bana Atananlar</span>
+        <span style="font-size: 0.72rem; padding: 1px 6px; border-radius: var(--radius-full); background: rgba(255,255,255,0.06); font-family: var(--font-mono);"><%= @counts[:my_tickets] %></span>
+      </a>
+
+      <a href="<%= tickets_path(view: 'unassigned') %>" style="display:flex; align-items:center; justify-content:space-between; padding: 8px 12px; border-radius: var(--radius-md); text-decoration:none; font-size: 0.85rem; font-weight: 500; color: <%= @view == 'unassigned' ? 'var(--azure-glow)' : 'var(--text-muted)' %>; background: <%= @view == 'unassigned' ? 'rgba(0, 120, 212, 0.15)' : 'transparent' %>;">
+        <span>Atanmamış Biletler</span>
+        <span style="font-size: 0.72rem; padding: 1px 6px; border-radius: var(--radius-full); background: rgba(255,255,255,0.06); font-family: var(--font-mono);"><%= @counts[:unassigned] %></span>
+      </a>
+
+      <a href="<%= tickets_path(view: 'urgent') %>" style="display:flex; align-items:center; justify-content:space-between; padding: 8px 12px; border-radius: var(--radius-md); text-decoration:none; font-size: 0.85rem; font-weight: 500; color: <%= @view == 'urgent' ? 'var(--azure-glow)' : 'var(--text-muted)' %>; background: <%= @view == 'urgent' ? 'rgba(0, 120, 212, 0.15)' : 'transparent' %>;">
+        <span>Acil / Öncelikli</span>
+        <span style="font-size: 0.72rem; padding: 1px 6px; border-radius: var(--radius-full); background: rgba(239,68,68,0.2); color:#f87171; font-family: var(--font-mono); font-weight:700;"><%= @counts[:urgent] %></span>
+      </a>
+
+      <a href="<%= tickets_path(view: 'solved') %>" style="display:flex; align-items:center; justify-content:space-between; padding: 8px 12px; border-radius: var(--radius-md); text-decoration:none; font-size: 0.85rem; font-weight: 500; color: <%= @view == 'solved' ? 'var(--azure-glow)' : 'var(--text-muted)' %>; background: <%= @view == 'solved' ? 'rgba(0, 120, 212, 0.15)' : 'transparent' %>;">
+        <span>Çözülen Biletler</span>
+        <span style="font-size: 0.72rem; padding: 1px 6px; border-radius: var(--radius-full); background: rgba(255,255,255,0.06); font-family: var(--font-mono);"><%= @counts[:solved] %></span>
+      </a>
+
+      <a href="<%= tickets_path(view: 'all') %>" style="display:flex; align-items:center; justify-content:space-between; padding: 8px 12px; border-radius: var(--radius-md); text-decoration:none; font-size: 0.85rem; font-weight: 500; color: <%= @view == 'all' ? 'var(--azure-glow)' : 'var(--text-muted)' %>; background: <%= @view == 'all' ? 'rgba(0, 120, 212, 0.15)' : 'transparent' %>;">
+        <span>Tüm Biletler</span>
+      </a>
+    </nav>
+
+    <!-- Channel Filters -->
+    <div style="margin-top: 28px; padding: 0 8px;">
+      <h3 style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-dim); font-weight: 700; margin-bottom: 10px;">Kanallar</h3>
+      <div style="display:flex; flex-direction:column; gap: 6px;">
+        <a href="<%= tickets_path(view: @view) %>" style="font-size: 0.8rem; text-decoration:none; color: <%= params[:channel].blank? ? 'var(--azure-glow)' : 'var(--text-dim)' %>;">• Tümü</a>
+        <a href="<%= tickets_path(view: @view, channel: 'call_center') %>" style="font-size: 0.8rem; text-decoration:none; color: <%= params[:channel] == 'call_center' ? 'var(--azure-glow)' : 'var(--text-dim)' %>;">🎙️ Çağrı Merkezi (AI)</a>
+        <a href="<%= tickets_path(view: @view, channel: 'web') %>" style="font-size: 0.8rem; text-decoration:none; color: <%= params[:channel] == 'web' ? 'var(--azure-glow)' : 'var(--text-dim)' %>;">🌐 Web Portalı</a>
+        <a href="<%= tickets_path(view: @view, channel: 'email') %>" style="font-size: 0.8rem; text-decoration:none; color: <%= params[:channel] == 'email' ? 'var(--azure-glow)' : 'var(--text-dim)' %>;">✉️ E-posta</a>
+        <a href="<%= tickets_path(view: @view, channel: 'chat') %>" style="font-size: 0.8rem; text-decoration:none; color: <%= params[:channel] == 'chat' ? 'var(--azure-glow)' : 'var(--text-dim)' %>;">💬 Canlı Sohbet</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Tickets Main Table Stage -->
+  <section style="flex: 1; display:flex; flex-direction:column; overflow-y: auto; background: var(--bg-canvas);">
+    <!-- Action Bar -->
+    <div style="padding: 16px 24px; border-bottom: 1px solid var(--bg-card-border); display:flex; align-items:center; justify-content:space-between; background: rgba(19, 28, 46, 0.4);">
+      <div style="display:flex; align-items:center; gap: 12px;">
+        <h2 style="font-size: 1.15rem; font-weight: 700; color: #fff;">
+          <%= case @view
+              when 'my_tickets' then 'Bana Atanan Biletler'
+              when 'unassigned' then 'Atanmamış Biletler'
+              when 'urgent' then 'Acil & Yüksek Öncelikli Biletler'
+              when 'solved' then 'Çözülen Biletler'
+              when 'all' then 'Tüm Destek Biletleri'
+              else 'Çözülmemiş Biletler'
+              end %>
+        </h2>
+        <span style="font-size: 0.8rem; color: var(--text-dim);">(<%= @tickets.count %> bilet)</span>
+      </div>
+
+      <a href="<%= new_ticket_path %>" class="btn-submit-reply" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px; padding: 7px 14px; font-size: 0.82rem;">
+        + Yeni Bilet
+      </a>
+    </div>
+
+    <!-- Tickets Table -->
+    <div style="overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
+        <thead>
+          <tr style="border-bottom: 1px solid var(--bg-card-border); color: var(--text-dim); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; background: rgba(15, 23, 42, 0.2);">
+            <th style="padding: 12px 20px; width: 40px;"><input type="checkbox"></th>
+            <th style="padding: 12px 10px;">Bilet & Konu</th>
+            <th style="padding: 12px 14px;">Talep Eden</th>
+            <th style="padding: 12px 14px;">Kanal</th>
+            <th style="padding: 12px 14px;">Temsilci</th>
+            <th style="padding: 12px 14px;">Öncelik</th>
+            <th style="padding: 12px 14px;">Durum</th>
+            <th style="padding: 12px 20px;">Tarih</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if @tickets.empty? %>
+            <tr>
+              <td colspan="8" style="padding: 40px; text-align: center; color: var(--text-dim);">
+                Bu görünümde henüz bir bilet bulunmuyor.
+              </td>
+            </tr>
+          <% else %>
+            <% @tickets.each do |ticket| %>
+              <tr style="border-bottom: 1px solid var(--bg-card-border); transition: background 0.15s ease;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+                <td style="padding: 14px 20px;"><input type="checkbox"></td>
+                <td style="padding: 14px 10px;">
+                  <div style="display:flex; align-items:center; gap: 8px;">
+                    <a href="<%= ticket_path(ticket) %>" style="color: #f1f5f9; font-weight: 600; text-decoration:none;">
+                      <%= ticket.formatted_number %> - <%= ticket.subject %>
+                    </a>
+                    <% if ticket.ai_summary.present? %>
+                      <span title="Azure AI Call Center tarafından otomatik özetlendi" style="background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.3); color: #d8b4fe; font-size: 0.68rem; font-weight: 700; padding: 1px 6px; border-radius: var(--radius-sm);">
+                        ✨ AI
+                      </span>
+                    <% end %>
+                  </div>
+                </td>
+                <td style="padding: 14px 14px; color: var(--text-muted); font-size: 0.82rem;">
+                  <%= ticket.requester&.name %>
+                </td>
+                <td style="padding: 14px 14px; color: var(--text-dim); font-size: 0.78rem;">
+                  <%= case ticket.channel
+                      when 'call_center' then '🎙️ Çağrı'
+                      when 'web' then '🌐 Web'
+                      when 'email' then '✉️ E-posta'
+                      when 'chat' then '💬 Chat'
+                      else ticket.channel.upcase
+                      end %>
+                </td>
+                <td style="padding: 14px 14px;">
+                  <% if ticket.assignee %>
+                    <span style="font-size: 0.8rem; color: #cbd5e1; display:flex; align-items:center; gap: 6px;">
+                      <span style="display:inline-block; width: 6px; height: 6px; border-radius:50%; background:#10b981;"></span>
+                      <%= ticket.assignee.name.split.first %>
+                    </span>
+                  <% else %>
+                    <span style="color: var(--text-dim); font-size: 0.78rem; font-style: italic;">Atanmadı</span>
+                  <% end %>
+                </td>
+                <td style="padding: 14px 14px;">
+                  <span style="font-weight: 700; font-size: 0.72rem; color: <%= ticket.priority_color %>; text-transform: uppercase;">
+                    <%= ticket.priority %>
+                  </span>
+                </td>
+                <td style="padding: 14px 14px;">
+                  <span class="status-pill status-<%= ticket.status %>">
+                    <%= ticket.status %>
+                  </span>
+                </td>
+                <td style="padding: 14px 20px; color: var(--text-dim); font-size: 0.78rem;">
+                  <%= time_ago_in_words(ticket.created_at) %> önce
+                </td>
+              </tr>
+            <% end %>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

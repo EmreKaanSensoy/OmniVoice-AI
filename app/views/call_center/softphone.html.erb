@@ -1,0 +1,500 @@
+<% content_for :title, "WebRTC Softphone & Canlı AI Asistanı - Zendesk Talk" %>
+
+<div class="softphone-wrapper">
+  <!-- Left Side: Dialpad & Softphone Console -->
+  <div class="dialer-card">
+    <div style="display:flex; justify-content:space-between; width:100%; align-items:center; margin-bottom: 16px;">
+      <div style="display:flex; align-items:center; gap: 6px;">
+        <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#10b981; animation: pulse-ring 2s infinite;"></span>
+        <span style="font-size:0.75rem; font-weight:700; color:#34d399;">Azure WebRTC Çevrimiçi</span>
+      </div>
+      <span style="font-size:0.75rem; color:var(--text-dim); font-family:var(--font-mono);"><%= current_organization.phone_number %></span>
+    </div>
+
+    <!-- Active Call Display Screen -->
+    <div class="dialer-screen">
+      <div id="call-status-label" style="font-size: 0.75rem; text-transform: uppercase; font-weight:700; color: #34d399; letter-spacing:0.05em; margin-bottom: 4px;">
+        ● Canlı Çağrı Devam Ediyor
+      </div>
+      <div class="dialer-caller-name" id="caller-name-display">
+        Ahmet Kaya (TechCorp CEO)
+      </div>
+      <div class="dialer-caller-num" id="caller-number-display">
+        +90 555 123 4567
+      </div>
+
+      <!-- Call Timer -->
+      <div class="call-timer" id="call-timer">02:18</div>
+
+      <!-- Animated Audio Equalizer Waveform -->
+      <div class="audio-visualizer-wave">
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+      </div>
+    </div>
+
+    <!-- Dialpad Keypad -->
+    <div class="dialpad-grid">
+      <button class="dial-btn" onclick="dialDigit('1')">1<span>&nbsp;</span></button>
+      <button class="dial-btn" onclick="dialDigit('2')">2<span>ABC</span></button>
+      <button class="dial-btn" onclick="dialDigit('3')">3<span>DEF</span></button>
+      <button class="dial-btn" onclick="dialDigit('4')">4<span>GHI</span></button>
+      <button class="dial-btn" onclick="dialDigit('5')">5<span>JKL</span></button>
+      <button class="dial-btn" onclick="dialDigit('6')">6<span>MNO</span></button>
+      <button class="dial-btn" onclick="dialDigit('7')">7<span>PQRS</span></button>
+      <button class="dial-btn" onclick="dialDigit('8')">8<span>TUV</span></button>
+      <button class="dial-btn" onclick="dialDigit('9')">9<span>WXYZ</span></button>
+      <button class="dial-btn" onclick="dialDigit('*')">*<span>&nbsp;</span></button>
+      <button class="dial-btn" onclick="dialDigit('0')">0<span>+</span></button>
+      <button class="dial-btn" onclick="dialDigit('#')">#<span>&nbsp;</span></button>
+    </div>
+
+    <!-- Interactive Full-Duplex AI Voice Assistant -->
+    <button type="button" class="btn-submit-reply" id="btn-ai-voice-flow" style="width: 100%; margin-bottom: 8px; background: var(--copilot-gradient); justify-content: center; font-size: 0.88rem; padding: 12px; font-weight:800; box-shadow: 0 4px 20px rgba(168, 85, 247, 0.4);" onclick="startFullDuplexAiVoiceFlow()">
+      🤖 Sesli AI Asistanını Başlat (AI Sorsun & Dinlesin)
+    </button>
+
+    <!-- Live Microphone Voice Mode Toggle -->
+    <button type="button" class="btn-submit-reply" id="btn-live-mic" style="width: 100%; margin-bottom: 12px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); justify-content: center; font-size: 0.82rem; padding: 9px;" onclick="toggleLiveMicrophone()">
+      🎙️ Sadece Mikrofonu Aç (Doğrudan Konuş)
+    </button>
+
+    <!-- Call Controls (Mute, Hold, Record, Hangup) -->
+    <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; margin-bottom: 16px;">
+      <button class="dial-btn" id="btn-mute" style="height: 44px; font-size: 0.82rem;" onclick="toggleMute()">
+        <span style="color:var(--text-main); font-weight:600;">🎤 Sessize Al</span>
+      </button>
+      <button class="dial-btn" id="btn-hold" style="height: 44px; font-size: 0.82rem;" onclick="toggleHold()">
+        <span style="color:var(--text-main); font-weight:600;">⏸️ Beklet</span>
+      </button>
+      <button class="dial-btn" style="height: 44px; font-size: 0.82rem;" onclick="toggleRecord()">
+        <span style="color:#f87171; font-weight:600;">🔴 Kayıt Aktif</span>
+      </button>
+    </div>
+
+    <!-- Hang up & Auto-create Ticket -->
+    <div class="call-action-row">
+      <button type="button" class="btn-call-end" id="btn-finish-call" onclick="finishAndSubmitVoice(event)" title="Görüşmeyi sonlandırır, Azure AI GPT-4o analizi yapar ve otomatik bilet üretir">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 8l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M5 3a2 2 0 00-2 2v1c0 8.284 6.716 15 15 15h1a2 2 0 002-2v-3.28a1 1 0 00-.684-.948l-4.493-1.498a1 1 0 00-1.21.502l-1.13 2.257a11.042 11.042 0 01-5.516-5.517l2.257-1.128a1 1 0 00.502-1.21L9.228 3.683A1 1 0 008.279 3H5z"/></svg>
+        Görüşmeyi Bitir & Bilet Aç
+      </button>
+    </div>
+  </div>
+
+  <!-- Right Side: Real-Time AI Speech Transcription & Agent Copilot -->
+  <div class="live-call-stage">
+    <!-- Stage Header -->
+    <div class="stage-header">
+      <div style="display:flex; align-items:center; gap: 12px;">
+        <span class="live-badge">CANLI SES AKIŞI</span>
+        <h3 style="font-size: 1rem; font-weight: 700; color: #fff;">
+          Azure AI Speech Canlı Transkripsiyon (STT)
+        </h3>
+      </div>
+
+      <div style="display:flex; align-items:center; gap: 8px;">
+        <span style="font-size: 0.75rem; color: var(--azure-glow);">Gecikme: ~120ms (Nöral STT)</span>
+      </div>
+    </div>
+
+    <!-- Live Stream Dialogue Area -->
+    <div class="transcripts-stream" id="transcript-container">
+      <div class="transcript-bubble transcript-ai">
+        <div style="font-size: 0.72rem; font-weight: 700; color: #d8b4fe; margin-bottom: 4px;">
+          🤖 Azure AI Voice IVR (00:02)
+        </div>
+        Acme Global Destek Hattına hoş geldiniz. Ben sesli yapay zeka asistanınız. Lütfen yapmak istediğiniz işlemi kısaca belirtin.
+      </div>
+
+      <div class="transcript-bubble transcript-customer">
+        <div style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; margin-bottom: 4px;">
+          👤 Müşteri - Ahmet Kaya (00:08)
+        </div>
+        Merhaba, bu sabah hesabımdan mükerrer çekim yapılmış, kartımdan 2 defa 450 TL kesildi, acil bir yetkiliyle görüşmek istiyorum.
+      </div>
+
+      <div class="transcript-bubble transcript-ai">
+        <div style="font-size: 0.72rem; font-weight: 700; color: #d8b4fe; margin-bottom: 4px;">
+          🤖 Azure AI Voice IVR (00:14)
+        </div>
+        Fatura ve tahsilat itirazınız için sizi hemen yetkili finans temsilcimiz Can Bey'e aktarıyorum.
+      </div>
+
+      <div class="transcript-bubble transcript-agent">
+        <div style="font-size: 0.72rem; font-weight: 700; color: #38bdf8; margin-bottom: 4px;">
+          🎧 Destek Temsilcisi - Can Yılmaz (00:20)
+        </div>
+        Merhabalar Ahmet Bey, itirazınızı inceledim. Banka provizyon tekrarı nedeniyle oluşmuş, fazla çekilen tutarın iadesini başlatıyorum.
+      </div>
+
+      <div class="transcript-bubble transcript-customer">
+        <div style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; margin-bottom: 4px;">
+          👤 Müşteri - Ahmet Kaya (00:32)
+        </div>
+        Ne zaman karta geri yansır peki Can Bey?
+      </div>
+    </div>
+
+    <!-- Live Agent Copilot Whisper Bar (At the bottom of the transcript) -->
+    <div style="padding: 16px 24px; background: rgba(15, 23, 42, 0.9); border-top: 1px solid var(--bg-card-border); display:flex; align-items:center; justify-content:space-between; gap: 16px;">
+      <div style="display:flex; align-items:flex-start; gap: 12px; flex: 1;">
+        <div style="width: 32px; height: 32px; border-radius: 8px; background: var(--copilot-gradient); display:flex; align-items:center; justify-content:center; color:#fff; font-size:1.1rem; flex-shrink:0;">
+          ✨
+        </div>
+        <div>
+          <div style="display:flex; align-items:center; gap: 8px; margin-bottom: 2px;">
+            <span style="font-size: 0.75rem; font-weight: 800; color: #c084fc; text-transform:uppercase; letter-spacing:0.05em;">
+              Microsoft AI Canlı Öneri (Copilot Assist)
+            </span>
+            <span class="sentiment-badge sentiment-positive" style="font-size:0.65rem;">
+              Çözüm Odaklı
+            </span>
+          </div>
+          <p id="live-copilot-text" style="font-size: 0.85rem; color: #f1f5f9; line-height: 1.4;">
+            Müşteriye söylenebilecek yanıt: <em>"İade talimatını bankaya ilettim, bankanızın işlem yoğunluğuna bağlı olarak 2 iş günü içinde kartınıza yansıyacaktır."</em>
+          </p>
+        </div>
+      </div>
+
+      <button type="button" class="btn-submit-reply" style="font-size: 0.8rem; padding: 8px 16px; background: var(--copilot-gradient); white-space:nowrap;" onclick="copyCopilotText()">
+        📋 Öneriyi Kopyala
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Softphone Call Timer
+  let seconds = 0;
+  const timerEl = document.getElementById('call-timer');
+  setInterval(() => {
+    seconds++;
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    timerEl.textContent = (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
+  }, 1000);
+
+  function dialDigit(num) {
+    const callerNum = document.getElementById('caller-number-display');
+    callerNum.textContent = callerNum.textContent + num;
+  }
+
+  function toggleMute() {
+    const btn = document.getElementById('btn-mute');
+    if (btn.classList.contains('active-ctrl')) {
+      btn.classList.remove('active-ctrl');
+      btn.innerHTML = '<span style="color:var(--text-main); font-weight:600;">🎤 Sessize Al</span>';
+    } else {
+      btn.classList.add('active-ctrl');
+      btn.innerHTML = '<span style="color:#ef4444; font-weight:700;">🔇 Sessizde</span>';
+    }
+  }
+
+  function toggleHold() {
+    const btn = document.getElementById('btn-hold');
+    if (btn.classList.contains('active-ctrl')) {
+      btn.classList.remove('active-ctrl');
+      btn.innerHTML = '<span style="color:var(--text-main); font-weight:600;">⏸️ Beklet</span>';
+    } else {
+      btn.classList.add('active-ctrl');
+      btn.innerHTML = '<span style="color:#f59e0b; font-weight:700;">▶️ Beklemede</span>';
+    }
+  }
+
+  function toggleRecord() {
+    alert("Görüşme Azure AI Speech ve Blob Storage üzerinde şifrelenerek kaydedilmektedir.");
+  }
+
+  function copyCopilotText() {
+    const text = document.getElementById('live-copilot-text').innerText;
+    navigator.clipboard.writeText(text);
+    alert("AI önerisi panoya kopyalandı!");
+  }
+
+  // --- İKİ YÖNLÜ CANLI SESLİ AI DİYALOĞU (Full-Duplex Voice Bot) ---
+  let recognition = null;
+  let isRecordingLiveVoice = false;
+  let liveTranscriptAccumulator = "";
+  let voiceFlowActive = false;
+
+  // 1. Text-to-Speech in Turkish (Web Speech API)
+  function speakTurkishText(text, callback) {
+    if (!('speechSynthesis' in window)) {
+      if (callback) callback();
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'tr-TR';
+    utterance.rate = 0.95;
+    utterance.pitch = 1.0;
+
+    const voices = window.speechSynthesis.getVoices();
+    const trVoice = voices.find(v => v.lang === 'tr-TR' || v.lang.startsWith('tr'));
+    if (trVoice) utterance.voice = trVoice;
+
+    let callbackFired = false;
+    utterance.onend = function() {
+      if (!callbackFired && callback) {
+        callbackFired = true;
+        callback();
+      }
+    };
+
+    utterance.onerror = function() {
+      if (!callbackFired && callback) {
+        callbackFired = true;
+        callback();
+      }
+    };
+
+    window.speechSynthesis.speak(utterance);
+  }
+
+  // 2. Main Voice Assistant Flow: AI asks first, then listens, then tickets & speaks back
+  function startFullDuplexAiVoiceFlow() {
+    voiceFlowActive = true;
+    liveTranscriptAccumulator = "";
+
+    const container = document.getElementById('transcript-container');
+    const statusLabel = document.getElementById('call-status-label');
+    const callerName = document.getElementById('caller-name-display');
+    const aiBtn = document.getElementById('btn-ai-voice-flow');
+
+    if (aiBtn) {
+      aiBtn.innerHTML = "✨ AI Sesli Asistan Devrede...";
+      aiBtn.style.opacity = "0.85";
+    }
+
+    callerName.textContent = "🤖 Sesli AI Asistanı";
+    statusLabel.textContent = "● 🔊 AI Soru Soruyor...";
+    statusLabel.style.color = "#c084fc";
+
+    // Setup interactive conversation container
+    container.innerHTML = `
+      <div style="background: rgba(168, 85, 247, 0.1); border: 1px dashed rgba(168, 85, 247, 0.4); padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; display:flex; align-items:center; justify-content:space-between;">
+        <span style="font-size:0.75rem; font-weight:700; color:#c084fc;">
+          ✨ İki Yönlü Canlı Sesli AI Diyaloğu Başladı
+        </span>
+        <span style="font-size:0.7rem; color:#94a3b8;">Azure OpenAI + Web Speech</span>
+      </div>
+
+      <div class="transcript-bubble transcript-ai" style="border: 2px solid #a855f7; background: rgba(168, 85, 247, 0.15);">
+        <div style="font-size: 0.72rem; font-weight: 800; color: #c084fc; margin-bottom: 4px;">
+          🤖 Yapay Zeka Asistanı (${new Date().toLocaleTimeString().slice(3)})
+        </div>
+        Merhaba! Acme Destek Merkezi'ne hoş geldiniz. Ben sesli yapay zeka asistanınızım. Size nasıl yardımcı olabilirim, sorununuz nedir?
+      </div>
+    `;
+
+    // Speak initial AI question in Turkish
+    const welcomePrompt = "Merhaba! Acme Destek Merkezi'ne hoş geldiniz. Ben sesli yapay zeka asistanınızım. Size nasıl yardımcı olabilirim, sorununuz nedir?";
+    speakTurkishText(welcomePrompt, function() {
+      activateCustomerListening();
+    });
+  }
+
+  // 3. Customer Listening via Microphone
+  function activateCustomerListening() {
+    const statusLabel = document.getElementById('call-status-label');
+    const callerName = document.getElementById('caller-name-display');
+    const container = document.getElementById('transcript-container');
+
+    statusLabel.textContent = "● 🎤 Sizi Dinliyorum... Lütfen konuşun";
+    statusLabel.style.color = "#10b981";
+    callerName.textContent = "Siz (Müşteri)";
+
+    // Add listening prompt & customer bubble in container
+    const customerBubbleId = "live-customer-speech-bubble";
+    const helperBlock = document.createElement('div');
+    helperBlock.id = "listening-helper-block";
+    helperBlock.innerHTML = `
+      <div style="padding: 10px; background: rgba(16, 185, 129, 0.1); border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.3); margin-bottom: 10px; display:flex; align-items:center; justify-content:space-between; gap: 8px;">
+        <span style="font-size: 0.78rem; font-weight:700; color: #34d399;">
+          🎤 Mikrofon Açık: Sorununuzu anlatın, dinliyorum...
+        </span>
+        <button type="button" class="btn-submit-reply" style="background:#10b981; font-size:0.75rem; padding: 5px 12px; margin:0;" onclick="finishAndSubmitVoice()">
+          ⏹️ Konuşmam Bitti, Bileti Aç
+        </button>
+      </div>
+
+      <div style="margin-bottom: 12px; display:flex; flex-wrap:wrap; gap: 6px; align-items:center;">
+        <span style="font-size:0.7rem; color:var(--text-dim);">Hızlı örnek senaryolar:</span>
+        <button type="button" class="badge-filter" style="cursor:pointer; font-size:0.72rem; padding: 3px 8px;" onclick="simulateCustomerVoice('Kredi kartımdan mükerrer 450 TL para çekilmiş, acil iadesini talep ediyorum.')">
+          💳 Mükerrer Para Çekimi
+        </button>
+        <button type="button" class="badge-filter" style="cursor:pointer; font-size:0.72rem; padding: 3px 8px;" onclick="simulateCustomerVoice('Sistemde ödeme adımı 500 hatası veriyor, müşteriler sepeti tamamlayamıyor acil müdahale edin.')">
+          ⚡ 500 Ödeme Hatası
+        </button>
+        <button type="button" class="badge-filter" style="cursor:pointer; font-size:0.72rem; padding: 3px 8px;" onclick="simulateCustomerVoice('Hesap şifremi unuttum, e-posta adresime doğrulama kodu ulaşmıyor.')">
+          🔑 Şifre Sıfırlama
+        </button>
+      </div>
+
+      <div class="transcript-bubble transcript-customer" id="${customerBubbleId}" style="border: 2px solid #38bdf8; background: rgba(0, 120, 212, 0.15); display:none;">
+        <div style="font-size: 0.72rem; font-weight: 700; color: #38bdf8; margin-bottom: 4px;">
+          👤 Sizin Sesiniz (Canlı STT)
+        </div>
+        <span id="live-customer-text-span"></span>
+      </div>
+    `;
+    container.appendChild(helperBlock);
+    container.scrollTop = container.scrollHeight;
+
+    // Start Web Speech API Recognition
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      if (recognition) {
+        try { recognition.stop(); } catch(e) {}
+      }
+      recognition = new SpeechRecognition();
+      recognition.lang = 'tr-TR';
+      recognition.continuous = true;
+      recognition.interimResults = true;
+
+      recognition.onresult = function(event) {
+        let chunk = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          chunk += event.results[i][0].transcript + ' ';
+        }
+        if (chunk.trim().length > 0) {
+          liveTranscriptAccumulator = chunk;
+          const bubble = document.getElementById(customerBubbleId);
+          const span = document.getElementById('live-customer-text-span');
+          if (bubble && span) {
+            bubble.style.display = 'block';
+            span.textContent = liveTranscriptAccumulator;
+            container.scrollTop = container.scrollHeight;
+          }
+        }
+      };
+
+      recognition.onerror = function(err) {
+        console.warn("Speech recognition error:", err);
+      };
+
+      try {
+        recognition.start();
+        isRecordingLiveVoice = true;
+      } catch (err) {
+        console.warn("Microphone start prevented:", err);
+      }
+    }
+  }
+
+  // 4. Quick scenario chip simulation
+  function simulateCustomerVoice(sampleText) {
+    if (recognition) {
+      try { recognition.stop(); } catch(e) {}
+      isRecordingLiveVoice = false;
+    }
+    liveTranscriptAccumulator = sampleText;
+    const bubble = document.getElementById('live-customer-speech-bubble');
+    const span = document.getElementById('live-customer-text-span');
+    if (bubble && span) {
+      bubble.style.display = 'block';
+      span.textContent = sampleText;
+    }
+    finishAndSubmitVoice();
+  }
+
+  // 5. Submit voice transcript, create ticket with Azure OpenAI, and AI speaks confirmation
+  function finishAndSubmitVoice(event) {
+    if (recognition) {
+      try { recognition.stop(); } catch(e) {}
+      isRecordingLiveVoice = false;
+    }
+
+    const transcript = liveTranscriptAccumulator.trim() || "Müşteri: Merhaba, yeni aldığımız hizmette bağlantı kopması yaşıyoruz, acil teknik destek rica ediyoruz.";
+
+    const statusLabel = document.getElementById('call-status-label');
+    const container = document.getElementById('transcript-container');
+    const finishBtn = document.getElementById('btn-finish-call');
+
+    if (finishBtn) {
+      finishBtn.innerHTML = "⏳ Azure OpenAI GPT-4o Bilet Açıyor...";
+      finishBtn.style.opacity = "0.7";
+      finishBtn.style.pointerEvents = "none";
+    }
+
+    statusLabel.textContent = "● Azure OpenAI GPT-4o Biletinizi Oluşturuyor...";
+    statusLabel.style.color = "#c084fc";
+
+    // Show processing indicator
+    const procEl = document.createElement('div');
+    procEl.id = 'ai-processing-pill';
+    procEl.style.padding = '8px 12px';
+    procEl.style.background = 'rgba(168, 85, 247, 0.15)';
+    procEl.style.border = '1px solid #a855f7';
+    procEl.style.borderRadius = '8px';
+    procEl.style.margin = '8px 0';
+    procEl.style.fontSize = '0.78rem';
+    procEl.style.color = '#c084fc';
+    procEl.innerHTML = '✨ Sesiniz Azure OpenAI GPT-4o tarafından analiz ediliyor ve destek bileti açılıyor...';
+    container.appendChild(procEl);
+    container.scrollTop = container.scrollHeight;
+
+    // Send to backend via fetch
+    fetch('/call_center/create_from_voice', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Accept': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || ''
+      },
+      body: new URLSearchParams({
+        transcript: transcript,
+        caller_name: 'Ahmet Kaya (Canlı Ses)',
+        caller_phone: '+90 555 123 4567'
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      const pill = document.getElementById('ai-processing-pill');
+      if (pill) pill.remove();
+
+      statusLabel.textContent = `● AI Bilgilendiriyor: Bilet #${data.ticket_number} Oluşturuldu`;
+      statusLabel.style.color = '#34d399';
+
+      // Add AI confirmation speech bubble in UI
+      const confirmBubble = document.createElement('div');
+      confirmBubble.className = 'transcript-bubble transcript-ai';
+      confirmBubble.style.border = '2px solid #10b981';
+      confirmBubble.style.background = 'rgba(16, 185, 129, 0.15)';
+      confirmBubble.innerHTML = `
+        <div style="font-size: 0.72rem; font-weight: 800; color: #34d399; margin-bottom: 4px;">
+          🤖 Yapay Zeka Asistanı (${new Date().toLocaleTimeString().slice(3)})
+        </div>
+        ${data.voice_response}
+        <div style="margin-top: 8px;">
+          <a href="${data.redirect_url}" class="btn-submit-reply" style="display:inline-flex; text-decoration:none; background:var(--emerald-gradient); font-size:0.75rem; padding: 4px 10px;">
+            🎫 Bilet #${data.ticket_number} Görüntüle →
+          </a>
+        </div>
+      `;
+      container.appendChild(confirmBubble);
+      container.scrollTop = container.scrollHeight;
+
+      // Speak ticket confirmation aloud in Turkish!
+      speakTurkishText(data.voice_response, function() {
+        setTimeout(() => {
+          window.location.href = data.redirect_url;
+        }, 1200);
+      });
+    })
+    .catch(err => {
+      console.error("Voice flow error:", err);
+      alert("Bilet oluşturulurken hata meydana geldi.");
+    });
+  }
+
+  // 6. Direct microphone toggle (standalone mode)
+  function toggleLiveMicrophone() {
+    startFullDuplexAiVoiceFlow();
+  }
+</script>

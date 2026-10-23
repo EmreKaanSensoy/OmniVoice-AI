@@ -1,0 +1,150 @@
+<% content_for :title, "Kontrol Paneli - Zendesk & Azure Call Center AI" %>
+
+<div style="padding: 28px; max-width: 1400px; width: 100%; margin: 0 auto;">
+  <!-- Welcome Banner -->
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 24px;">
+    <div>
+      <h1 style="font-size: 1.6rem; font-weight: 800; color: #fff; margin-bottom: 4px;">
+        Hoş Geldiniz, <%= current_user.name %> 👋
+      </h1>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">
+        Acme Destek Masası ve <strong style="color:var(--azure-glow);">Microsoft Call Center AI</strong> gerçek zamanlı izleme merkezi.
+      </p>
+    </div>
+
+    <div style="display:flex; gap: 10px;">
+      <a href="<%= new_ticket_path %>" class="btn-submit-reply" style="text-decoration:none; display:inline-flex; align-items:center; gap:8px;">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+        Yeni Bilet Oluştur
+      </a>
+      <a href="<%= call_center_softphone_path %>" class="btn-softphone-dock" style="text-decoration:none; font-size:0.88rem; padding: 9px 16px;">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+        Canlı Softphone
+      </a>
+    </div>
+  </div>
+
+  <!-- KPI Cards Grid -->
+  <div class="analytics-grid" style="padding:0; margin-bottom: 28px;">
+    <div class="kpi-card">
+      <span class="kpi-title">Çözülmemiş Biletler</span>
+      <span class="kpi-value"><%= @unresolved_count %></span>
+      <span class="kpi-trend" style="color: var(--accent-amber);">Bekleyen Müşteri Talepleri</span>
+    </div>
+
+    <div class="kpi-card">
+      <span class="kpi-title">Bana Atananlar</span>
+      <span class="kpi-value"><%= @my_assigned_count %></span>
+      <span class="kpi-trend">Aktif Sorumluluklarım</span>
+    </div>
+
+    <div class="kpi-card">
+      <span class="kpi-title">Acil / Yüksek Öncelikli</span>
+      <span class="kpi-value" style="color: var(--accent-red);"><%= @urgent_count %></span>
+      <span class="kpi-trend" style="color: var(--accent-red);">SLA Riski Altında</span>
+    </div>
+
+    <div class="kpi-card" style="border-color: rgba(56, 189, 248, 0.4); background: linear-gradient(135deg, rgba(0, 120, 212, 0.1) 0%, rgba(19, 28, 46, 0.8) 100%);">
+      <span class="kpi-title" style="color: var(--azure-glow);">Azure AI Çağrı Asistanı</span>
+      <span class="kpi-value"><%= @ai_assisted_count %></span>
+      <span class="kpi-trend">Otomatik Analiz Edilen Bilet</span>
+    </div>
+  </div>
+
+  <!-- Main Split: Recent Tickets & Call Center Stream -->
+  <div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 24px;">
+    <!-- Recent Tickets -->
+    <div style="background: var(--bg-card); border: 1px solid var(--bg-card-border); border-radius: var(--radius-lg); padding: 22px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 18px;">
+        <h2 style="font-size: 1.1rem; font-weight: 700; color: #fff;">Son Destek Biletleri</h2>
+        <a href="<%= tickets_path %>" style="color: var(--azure-glow); font-size: 0.82rem; text-decoration:none; font-weight: 600;">Tümünü Gör →</a>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <% @tickets.each do |ticket| %>
+          <a href="<%= ticket_path(ticket) %>" style="display:flex; align-items:center; justify-content:space-between; padding: 12px 16px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--bg-card-border); border-radius: var(--radius-md); text-decoration:none; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='rgba(255,255,255,0.02)'">
+            <div style="display:flex; align-items:center; gap: 12px;">
+              <span class="status-pill status-<%= ticket.status %>"><%= ticket.status %></span>
+              <div>
+                <h4 style="font-size: 0.88rem; font-weight: 600; color: #f8fafc; margin-bottom: 2px;">
+                  <%= ticket.formatted_number %> - <%= ticket.subject %>
+                </h4>
+                <p style="font-size: 0.75rem; color: var(--text-dim);">
+                  Talep Eden: <%= ticket.requester&.name %> • Kanal: <%= ticket.channel.upcase %> • <%= time_ago_in_words(ticket.created_at) %> önce
+                </p>
+              </div>
+            </div>
+
+            <div style="display:flex; align-items:center; gap: 10px;">
+              <% if ticket.ai_summary.present? %>
+                <span title="Microsoft Call Center AI tarafından analiz edildi" style="background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.3); color: #d8b4fe; font-size: 0.7rem; font-weight: 700; padding: 2px 7px; border-radius: var(--radius-sm); display:flex; align-items:center; gap: 4px;">
+                  ✨ AI
+                </span>
+              <% end %>
+              <span style="font-size: 0.75rem; font-weight: 600; color: <%= ticket.priority_color %>;">
+                <%= ticket.priority.upcase %>
+              </span>
+            </div>
+          </a>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Call Center AI Quick Panel -->
+    <div style="display:flex; flex-direction:column; gap: 20px;">
+      <!-- Mobile & AI Assistant Integration Status Box -->
+      <div style="background: linear-gradient(135deg, rgba(0, 120, 212, 0.12) 0%, rgba(19, 28, 46, 0.9) 100%); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: var(--radius-lg); padding: 22px;">
+        <div style="display:flex; align-items:center; gap: 10px; margin-bottom: 12px;">
+          <div style="width: 36px; height: 36px; border-radius: 10px; background: var(--azure-gradient); display:flex; align-items:center; justify-content:center; color:#fff; font-size:1.1rem;">
+            📱
+          </div>
+          <div>
+            <h3 style="font-size: 1rem; font-weight: 700; color: #fff;">Mobil Uygulama & AI Motoru</h3>
+            <span style="font-size: 0.75rem; color: #34d399; font-weight:700;">● Expo Go API Çevrimiçi</span>
+          </div>
+        </div>
+
+        <p style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.5; margin-bottom: 16px;">
+          Müşteriler mobil uygulama üzerinden sesli olarak yapay zekaya sorunlarını anlatır. Biletler anında bu panele düşer; bilet çözüldüğünde müşterinin uygulaması otomatik aranır.
+        </p>
+
+        <div style="display:flex; flex-direction:column; gap: 8px; margin-bottom: 14px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; padding: 10px 12px; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--bg-card-border); border-radius: 8px; font-size:0.8rem;">
+            <span style="color: #94a3b8;">Azure OpenAI Modeli:</span>
+            <span style="font-weight:700; color: #38bdf8; font-family: var(--font-mono);">gpt-4o</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; padding: 10px 12px; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--bg-card-border); border-radius: 8px; font-size:0.8rem;">
+            <span style="color: #94a3b8;">Mobil API Durumu:</span>
+            <span style="font-weight:700; color: #34d399;">/api/v1/mobile (Hazır)</span>
+          </div>
+        </div>
+
+        <a href="<%= tickets_path(channel: 'call_center') %>" class="btn-submit-reply" style="width: 100%; justify-content:center; text-decoration:none; padding:10px; font-size:0.85rem; font-weight:700;">
+          🎙️ Mobil & AI Biletlerini İncele →
+        </a>
+      </div>
+
+      <!-- Recent Completed Calls -->
+      <div style="background: var(--bg-card); border: 1px solid var(--bg-card-border); border-radius: var(--radius-lg); padding: 22px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 14px;">
+          <h3 style="font-size: 0.95rem; font-weight: 700; color: #fff;">Son Çağrılar & Analizler</h3>
+          <a href="<%= call_center_path %>" style="color: var(--azure-glow); font-size: 0.78rem; text-decoration:none;">Tümü →</a>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap: 10px;">
+          <% @completed_calls.each do |call| %>
+            <div style="padding: 10px 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--bg-card-border); border-radius: var(--radius-md);">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 4px;">
+                <span style="font-size: 0.82rem; font-weight: 600; color: #f1f5f9;"><%= call.caller_name %></span>
+                <span style="font-size: 0.72rem; color: var(--text-dim); font-family: var(--font-mono);"><%= call.duration_formatted %></span>
+              </div>
+              <p style="font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                <%= call.ai_summary || "Analiz tamamlandı." %>
+              </p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

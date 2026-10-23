@@ -1,0 +1,62 @@
+<% content_for :title, "Yeni Bilet Oluştur - Zendesk Support" %>
+
+<div style="max-width: 800px; margin: 40px auto; padding: 28px; background: var(--bg-card); border: 1px solid var(--bg-card-border); border-radius: var(--radius-xl); backdrop-filter: blur(16px);">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 24px; border-bottom: 1px solid var(--bg-card-border); padding-bottom: 16px;">
+    <div>
+      <h1 style="font-size: 1.4rem; font-weight: 800; color: #fff;">Yeni Destek Bileti</h1>
+      <p style="font-size: 0.85rem; color: var(--text-muted);">Müşteri veya temsilci adına yeni bir talep kaydı açın.</p>
+    </div>
+    <a href="<%= tickets_path %>" style="color: var(--text-dim); text-decoration:none; font-size: 0.85rem;">← Geri Dön</a>
+  </div>
+
+  <%= form_with model: @ticket, local: true, style: "display:flex; flex-direction:column; gap: 20px;" do |f| %>
+    <div class="meta-group">
+      <label class="meta-label">Talep Eden (Müşteri)</label>
+      <%= f.collection_select :requester_id, @customers, :id, :name, {}, class: "meta-select" %>
+    </div>
+
+    <div class="meta-group">
+      <label class="meta-label">Konu Başlığı</label>
+      <%= f.text_field :subject, class: "meta-select", placeholder: "Örn: Ödeme portalında SSL sertifika hatası", required: true %>
+    </div>
+
+    <div class="meta-group">
+      <label class="meta-label">Açıklama / İlk Mesaj</label>
+      <%= f.text_area :description, class: "composer-textarea", style: "min-height: 140px;", placeholder: "Müşterinin sorununun detayları...", required: true %>
+    </div>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+      <div class="meta-group">
+        <label class="meta-label">Öncelik</label>
+        <%= f.select :priority, Ticket::PRIORITIES.map { |p| [p.upcase, p] }, {}, class: "meta-select" %>
+      </div>
+
+      <div class="meta-group">
+        <label class="meta-label">Atanan Temsilci</label>
+        <%= f.collection_select :assignee_id, @agents, :id, :name, { include_blank: "Atanmamış" }, class: "meta-select" %>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+      <div class="meta-group">
+        <label class="meta-label">Kanal</label>
+        <%= f.select :channel, Ticket::CHANNELS.map { |c| [c.upcase, c] }, {}, class: "meta-select" %>
+      </div>
+
+      <div class="meta-group">
+        <label class="meta-label">Tür</label>
+        <%= f.select :ticket_type, Ticket::TICKET_TYPES.map { |t| [t.titleize, t] }, {}, class: "meta-select" %>
+      </div>
+    </div>
+
+    <div class="meta-group">
+      <label class="meta-label">Etiketler</label>
+      <%= f.text_field :tags, class: "meta-select", placeholder: "fatura, bug, onboarding" %>
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; gap: 12px; margin-top: 10px;">
+      <a href="<%= tickets_path %>" class="btn-softphone-dock" style="text-decoration:none;">İptal</a>
+      <%= f.submit "Bileti Oluştur", class: "btn-submit-reply", style: "padding: 10px 24px;" %>
+    </div>
+  <% end %>
+</div>

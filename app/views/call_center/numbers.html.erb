@@ -1,0 +1,222 @@
+<% content_for :title, "Telefon Numaraları & Santral Yönetimi - Zendesk Talk" %>
+
+<div style="padding: 28px; max-width: 1400px; width: 100%; margin: 0 auto;">
+  <!-- Header Strip -->
+  <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 24px;">
+    <div>
+      <div style="display:flex; align-items:center; gap: 10px; margin-bottom: 4px;">
+        <h1 style="font-size: 1.6rem; font-weight: 800; color: #fff;">Telefon Numaraları & Santral Yönetimi</h1>
+        <span style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #34d399; font-size: 0.72rem; font-weight: 700; padding: 2px 10px; border-radius: var(--radius-full); display:flex; align-items:center; gap:6px;">
+          <span style="width:6px; height:6px; border-radius:50%; background:#10b981; animation: pulse-ring 2s infinite;"></span>
+          PSTN / SIP Trunk Çevrimiçi
+        </span>
+      </div>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">
+        Müşterilerinizin arayacağı santral hatlarını yönetin, IVR karşılama sesini belirleyin ve yapay zeka entegrasyonunu yapılandırın.
+      </p>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div style="display:flex; gap: 8px;">
+      <a href="<%= call_center_path %>" class="btn-submit-reply" style="text-decoration:none; background: var(--bg-card); border: 1px solid var(--bg-card-border); color: var(--text-main); font-size: 0.85rem; padding: 8px 16px;">
+        📊 Çağrı Geçmişi
+      </a>
+      <a href="<%= call_center_softphone_path %>" class="btn-submit-reply" style="text-decoration:none; background: var(--copilot-gradient); font-size: 0.85rem; padding: 8px 16px; font-weight:700;">
+        🎙️ WebRTC Softphone
+      </a>
+    </div>
+  </div>
+
+  <div style="display:grid; grid-template-columns: 1.2fr 0.8fr; gap: 24px; margin-bottom: 24px;">
+    <!-- Left Column: Primary Phone Number Configuration -->
+    <div style="background: var(--bg-card); border: 1px solid var(--bg-card-border); border-radius: var(--radius-lg); padding: 24px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--bg-card-border);">
+        <div style="display:flex; align-items:center; gap: 12px;">
+          <div style="width: 44px; height: 44px; border-radius: 12px; background: var(--azure-gradient); display:flex; align-items:center; justify-content:center; color:#fff; font-size:1.3rem;">
+            📞
+          </div>
+          <div>
+            <h2 style="font-size: 1.15rem; font-weight: 700; color: #fff;">Aktif Destek Hattı Numarası</h2>
+            <span style="font-size: 0.75rem; color: var(--text-dim);">Gelen çağrıların karşılandığı ve giden aramaların yapıldığı birincil hat</span>
+          </div>
+        </div>
+
+        <span class="sentiment-badge sentiment-positive" style="font-size: 0.72rem; padding: 4px 10px;">
+          Aktif Hat
+        </span>
+      </div>
+
+      <!-- Phone Edit Form -->
+      <%= form_with url: call_center_update_number_path, method: :patch, local: true do |f| %>
+        <div style="margin-bottom: 18px;">
+          <label style="display:block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 8px;">
+            Kendi Telefon Numaranız (Santral / Çağrı Hattı)
+          </label>
+          <div style="position:relative;">
+            <input type="text" name="phone_number" value="<%= @organization.phone_number_formatted %>" required
+                   style="width: 100%; padding: 12px 16px; background: var(--bg-canvas); border: 1px solid var(--bg-card-border); border-radius: var(--radius-md); color: #38bdf8; font-family: var(--font-mono); font-size: 1.1rem; font-weight: 700; outline:none;"
+                   placeholder="+90 5xx xxx xx xx veya +90 850 xxx xx xx">
+          </div>
+          <span style="font-size: 0.75rem; color: var(--text-dim); margin-top: 6px; display:block; line-height: 1.4;">
+            Müşterilerinizin arayacağı ve çözüm geri aramalarının yapılacağı numara (Örn: <strong>+90 532 123 4567</strong> veya <strong>+90 850 300 4050</strong>).
+          </span>
+        </div>
+
+        <!-- Call forwarding quick tip box -->
+        <div style="margin-bottom: 18px; padding: 12px 14px; background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 8px;">
+          <div style="font-size: 0.78rem; font-weight: 800; color: #38bdf8; margin-bottom: 4px;">
+            💡 Kendi Cep Telefonunuzu Kullanmanın En Pratik Yolu: Çağrı Yönlendirme
+          </div>
+          <p style="font-size: 0.75rem; color: #cbd5e1; line-height: 1.4; margin: 0;">
+            Kendi cep telefonunuzdan <strong>**21*0850...#</strong> tuşlayarak gelen aramaları doğrudan bu yapay zeka santraline yönlendirebilirsiniz. Müşterileriniz doğrudan sizin cep numaranızı aradığında yapay zeka asistanı telefonu açar, sorunu sorar, bileti açar ve çözüldüğünde müşteriyi geri arar!
+          </p>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <label style="display:block; font-size: 0.82rem; font-weight: 700; color: #cbd5e1; margin-bottom: 8px;">
+            🤖 AI Karşılama & Soru Metni (IVR Greeting Speech)
+          </label>
+          <textarea name="ivr_greeting" rows="3"
+                    style="width: 100%; padding: 12px 14px; background: var(--bg-canvas); border: 1px solid var(--bg-card-border); border-radius: var(--radius-md); color: #f1f5f9; font-size: 0.88rem; line-height: 1.5; resize: vertical; outline:none;"
+                    placeholder="Müşteri bu numarayı aradığında yapay zekanın ilk seslendireceği karşılama cümlesi..."><%= @organization.ivr_greeting %></textarea>
+          <span style="font-size: 0.72rem; color: var(--text-dim); margin-top: 4px; display:block;">
+            Müşteri aradığında Azure AI Speech (tr-TR-AhmetNeural / tr-TR-EmelNeural) bu metni Türkçe seslendirecektir.
+          </span>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end;">
+          <button type="submit" class="btn-submit-reply" style="font-size: 0.88rem; padding: 10px 22px; font-weight: 700;">
+            💾 Numarayı & Ayarları Kaydet
+          </button>
+        </div>
+      <% end %>
+
+      <!-- Webhook & Technical Connection Box -->
+      <div style="margin-top: 24px; padding: 16px; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--bg-card-border); border-radius: var(--radius-md);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+          <span style="font-size: 0.75rem; font-weight: 800; color: #c084fc; text-transform: uppercase; letter-spacing: 0.05em;">
+            🔗 Gelen Arama Webhook URL'iniz (PSTN / Azure / Twilio)
+          </span>
+          <button type="button" class="badge-filter" onclick="navigator.clipboard.writeText('<%= @webhook_url %>'); alert('Webhook URL kopyalandı!');" style="cursor:pointer; font-size: 0.7rem; padding: 2px 8px;">
+            📋 Kopyala
+          </button>
+        </div>
+        <div style="font-family: var(--font-mono); font-size: 0.82rem; color: #38bdf8; background: #020617; padding: 8px 12px; border-radius: 6px; word-break: break-all; border: 1px solid rgba(56, 189, 248, 0.2);">
+          <%= @webhook_url %>
+        </div>
+        <span style="font-size: 0.72rem; color: var(--text-dim); margin-top: 6px; display:block;">
+          Bu URL'i Azure EventGrid, Twilio Webhook veya SIP Santralinizin çağrı tamamlama bildirimine yapıştırın.
+        </span>
+      </div>
+    </div>
+
+    <!-- Right Column: Interactive Live Incoming Call Simulator -->
+    <div style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.95) 100%); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: var(--radius-lg); padding: 24px; position:relative; overflow:hidden;">
+      <div style="display:flex; align-items:center; gap: 8px; margin-bottom: 6px;">
+        <span class="live-badge" style="background: var(--copilot-gradient);">CANLI TEST</span>
+        <h2 style="font-size: 1.15rem; font-weight: 700; color: #fff;">PSTN / Telefon Çağrı Simülatörü</h2>
+      </div>
+      <p style="font-size: 0.8rem; color: #cbd5e1; margin-bottom: 18px; line-height: 1.4;">
+        Müşterinin cep telefonundan santral numaranızı (<strong style="color:var(--azure-glow);"><%= @organization.phone_number_formatted %></strong>) aradığını simüle edin. Bilet otomatik açılacak ve çözüm sonrası müşteriye geri arama yapılacaktır.
+      </p>
+
+      <%= form_with url: call_center_custom_incoming_call_path, method: :post, local: true do |f| %>
+        <div style="margin-bottom: 12px;">
+          <label style="display:block; font-size: 0.78rem; font-weight: 700; color: #cbd5e1; margin-bottom: 4px;">
+            Arayan Müşteri Adı
+          </label>
+          <input type="text" name="caller_name" value="Canan Arslan" required
+                 style="width: 100%; padding: 9px 12px; background: var(--bg-canvas); border: 1px solid var(--bg-card-border); border-radius: var(--radius-md); color: #f1f5f9; font-size: 0.85rem; outline:none;">
+        </div>
+
+        <div style="margin-bottom: 12px;">
+          <label style="display:block; font-size: 0.78rem; font-weight: 700; color: #cbd5e1; margin-bottom: 4px;">
+            Arayan Müşteri Cep Telefonu
+          </label>
+          <input type="text" name="caller_phone" value="+90 532 888 1234" required
+                 style="width: 100%; padding: 9px 12px; background: var(--bg-canvas); border: 1px solid var(--bg-card-border); border-radius: var(--radius-md); color: #34d399; font-family: var(--font-mono); font-size: 0.9rem; font-weight:700; outline:none;">
+        </div>
+
+        <div style="margin-bottom: 16px;">
+          <label style="display:block; font-size: 0.78rem; font-weight: 700; color: #cbd5e1; margin-bottom: 4px;">
+            Müşterinin Telefonda İlettiği Sorun
+          </label>
+          <textarea name="customer_issue" id="customer_issue_field" rows="3" required
+                    style="width: 100%; padding: 10px 12px; background: var(--bg-canvas); border: 1px solid var(--bg-card-border); border-radius: var(--radius-md); color: #f1f5f9; font-size: 0.82rem; line-height: 1.4; resize: vertical; outline:none;"
+                    placeholder="Müşterinin telefonda söylediği arıza veya talep cümlesi...">Online ödeme yaptık ancak sipariş onay e-postası ve lisans anahtarımız tarafımıza ulaşmadı, acil yardım bekliyoruz.</textarea>
+
+          <!-- Quick Scenario Pills -->
+          <div style="margin-top: 8px; display:flex; flex-wrap:wrap; gap: 6px;">
+            <button type="button" class="badge-filter" style="font-size:0.7rem; padding: 3px 8px; cursor:pointer;" onclick="setIssueText('Kredi kartımdan mükerrer 500 TL çekim yapılmış, acil iptal ve iadesini rica ediyorum.')">
+              💳 Mükerrer Çekim
+            </button>
+            <button type="button" class="badge-filter" style="font-size:0.7rem; padding: 3px 8px; cursor:pointer;" onclick="setIssueText('Sunucularımızda 504 Gateway Timeout alıyoruz, API isteklerimiz tamamen durdu.')">
+              ⚡ 504 API Hatası
+            </button>
+            <button type="button" class="badge-filter" style="font-size:0.7rem; padding: 3px 8px; cursor:pointer;" onclick="setIssueText('Yıllık aboneliğimizi bütçe kısıtı nedeniyle iptal etmek istiyoruz.')">
+              ❌ Abonelik İptali
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-submit-reply" style="width: 100%; justify-content: center; font-size: 0.9rem; padding: 12px; background: var(--emerald-gradient); font-weight: 800; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);">
+          📞 Müşteri Santrali Arasın & Bilet Açılsın →
+        </button>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Section 3: Adım Adım Gerçek Numara Ekleme Rehberi -->
+  <div style="background: var(--bg-card); border: 1px solid var(--bg-card-border); border-radius: var(--radius-lg); padding: 24px;">
+    <h3 style="font-size: 1.15rem; font-weight: 800; color: #fff; margin-bottom: 16px;">
+      📖 Gerçek Telefon Numarası Ekleme ve Santral Bağlama Rehberi
+    </h3>
+
+    <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+      <!-- Step 1: Azure Direct Number -->
+      <div style="padding: 18px; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--bg-card-border); border-radius: var(--radius-md);">
+        <div style="width: 32px; height: 32px; border-radius: 8px; background: var(--azure-gradient); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; margin-bottom: 12px;">
+          1
+        </div>
+        <h4 style="font-size: 0.95rem; font-weight: 700; color: #38bdf8; margin-bottom: 8px;">
+          Azure Communication Services (ACS)
+        </h4>
+        <p style="font-size: 0.8rem; color: #cbd5e1; line-height: 1.5;">
+          Azure Portal üzerinden doğrudan kurumsal veya uluslararası telefon numarası (Toll-Free veya Local) satın alabilirsiniz. Numara hazır olduğunda yukarıdaki kutucuğa ekleyin.
+        </p>
+      </div>
+
+      <!-- Step 2: Türkiye SIP Trunk (Netgsm, Türk Telekom, Turkcell) -->
+      <div style="padding: 18px; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--bg-card-border); border-radius: var(--radius-md);">
+        <div style="width: 32px; height: 32px; border-radius: 8px; background: var(--copilot-gradient); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; margin-bottom: 12px;">
+          2
+        </div>
+        <h4 style="font-size: 0.95rem; font-weight: 700; color: #c084fc; margin-bottom: 8px;">
+          Türkiye Operatörleri (SIP Trunk / 0850)
+        </h4>
+        <p style="font-size: 0.8rem; color: #cbd5e1; line-height: 1.5;">
+          Türkiye'de Netgsm, Türk Telekom veya Vodafone'dan aldığınız <strong>0850</strong> veya <strong>0212</strong> numaranızı Azure <strong>Direct Routing (SIP Trunk)</strong> ile dakikalar içinde sisteme bağlayabilirsiniz.
+        </p>
+      </div>
+
+      <!-- Step 3: Webhook & Otomatik Geri Arama -->
+      <div style="padding: 18px; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--bg-card-border); border-radius: var(--radius-md);">
+        <div style="width: 32px; height: 32px; border-radius: 8px; background: var(--emerald-gradient); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; margin-bottom: 12px;">
+          3
+        </div>
+        <h4 style="font-size: 0.95rem; font-weight: 700; color: #34d399; margin-bottom: 8px;">
+          Otomatik Biletleme & Geri Arama
+        </h4>
+        <p style="font-size: 0.8rem; color: #cbd5e1; line-height: 1.5;">
+          Müşteri aradığında çağrı transkripti Azure OpenAI GPT-4o ile işlenip bilet açılır. Çözüm ekibi bilet sayfasında <em>"✅ Çöz & Müşteriyi AI ile Geri Ara"</em> butonuna bastığında müşteri telefonundan otomatik geri aranır.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function setIssueText(text) {
+    document.getElementById('customer_issue_field').value = text;
+  }
+</script>

@@ -1,0 +1,56 @@
+<% content_for :title, "Zendesk Guide - Müşteri Bilgi Bankası" %>
+
+<div style="padding: 28px; max-width: 1200px; width: 100%; margin: 0 auto;">
+  <!-- Guide Hero Search -->
+  <div style="text-align:center; padding: 40px 20px; background: radial-gradient(circle at 50% 50%, rgba(0, 120, 212, 0.15) 0%, transparent 70%); border-bottom: 1px solid var(--bg-card-border); margin-bottom: 30px;">
+    <h1 style="font-size: 1.8rem; font-weight: 800; color: #fff; margin-bottom: 8px;">
+      Yardım Merkezi ve Bilgi Bankası
+    </h1>
+    <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px;">
+      Sıkça sorulan sorular, API dokümantasyonu ve rehber makaleler.
+    </p>
+
+    <%= form_with url: knowledge_articles_path, method: :get, local: true, style: "max-width: 560px; margin: 0 auto;" do |f| %>
+      <div class="search-box" style="width: 100%; padding: 10px 16px; border-radius: var(--radius-lg);">
+        <svg width="20" height="20" fill="none" stroke="#64748b" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input type="text" name="q" value="<%= params[:q] %>" placeholder="Sorunuzu veya anahtar kelimeyi yazın..." style="font-size: 0.95rem;">
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Categories Bar -->
+  <div style="display:flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap;">
+    <a href="<%= knowledge_articles_path %>" class="tab-btn <%= 'active' if params[:category].blank? %>" style="text-decoration:none;">
+      Tümü
+    </a>
+    <% @categories.each do |cat| %>
+      <a href="<%= knowledge_articles_path(category: cat) %>" class="tab-btn <%= 'active' if params[:category] == cat %>" style="text-decoration:none;">
+        <%= cat %>
+      </a>
+    <% end %>
+  </div>
+
+  <!-- Articles Grid -->
+  <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px;">
+    <% @articles.each do |article| %>
+      <a href="<%= knowledge_article_path(article) %>" style="background: var(--bg-card); border: 1px solid var(--bg-card-border); border-radius: var(--radius-lg); padding: 22px; text-decoration:none; display:flex; flex-direction:column; justify-content:space-between; transition: all 0.2s ease;" onmouseover="this.style.borderColor='var(--azure-glow)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.borderColor='var(--bg-card-border)'; this.style.transform='none';">
+        <div>
+          <span style="display:inline-block; font-size: 0.72rem; font-weight: 700; color: var(--azure-glow); text-transform:uppercase; margin-bottom: 8px;">
+            <%= article.category %>
+          </span>
+          <h3 style="font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: 8px; line-height: 1.4;">
+            <%= article.title %>
+          </h3>
+          <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+            <%= article.body %>
+          </p>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 18px; border-top: 1px solid var(--bg-card-border); padding-top: 12px; font-size: 0.75rem; color: var(--text-dim);">
+          <span>Yazar: <%= article.author&.name %></span>
+          <span>👁️ <%= article.views_count %> okundu</span>
+        </div>
+      </a>
+    <% end %>
+  </div>
+</div>

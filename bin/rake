@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby.exe
+require File.expand_path("config/boot", Dir.pwd)
+require "rake"
+Rake.application.run

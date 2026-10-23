@@ -1,0 +1,52 @@
+<% content_for :title, "Yönetici Girişi - Zendesk SaaS & Call Center AI" %>
+
+<div style="min-height: 100vh; width: 100vw; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 20%, rgba(0, 120, 212, 0.18) 0%, rgba(15, 23, 42, 0.95) 70%), #020617; padding: 24px; position: relative; overflow-y: auto;">
+  <!-- Ambient Glow Effects -->
+  <div style="position: absolute; top: 12%; left: 18%; width: 360px; height: 360px; background: rgba(0, 120, 212, 0.15); filter: blur(130px); border-radius: 50%; pointer-events: none;"></div>
+  <div style="position: absolute; bottom: 12%; right: 18%; width: 360px; height: 360px; background: rgba(168, 85, 247, 0.12); filter: blur(130px); border-radius: 50%; pointer-events: none;"></div>
+
+  <div style="max-width: 480px; width: 100%; background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: var(--radius-xl); padding: 42px 36px; backdrop-filter: blur(24px); box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8); position: relative; z-index: 2;">
+    <!-- Logo & Header -->
+    <div style="text-align: center; margin-bottom: 28px;">
+      <div style="width: 60px; height: 60px; background: var(--azure-gradient); border-radius: 18px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 900; font-size: 1.9rem; margin: 0 auto 16px; box-shadow: 0 0 35px rgba(0, 120, 212, 0.45);">
+        Z
+      </div>
+      <h1 style="font-size: 1.65rem; font-weight: 800; color: #fff; margin-bottom: 6px; letter-spacing: -0.02em;">
+        Zendesk Destek Masası
+      </h1>
+      <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.4;">
+        Yönetici & Destek Ekibi Çalışma Masası
+      </p>
+    </div>
+
+    <!-- Phone Call-In Notice Banner -->
+    <div style="margin-bottom: 24px; padding: 12px 14px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px; display: flex; align-items: center; gap: 10px;">
+      <span style="font-size: 1.3rem;">📞</span>
+      <div style="font-size: 0.76rem; color: #cbd5e1; line-height: 1.4;">
+        <strong style="color:#34d399;">Sesli Çağrı Merkezi Aktif:</strong> Müşterileriniz doğrudan telefonla arayarak sesli talep iletir. AI görüşmeyi analiz eder ve buraya bilet olarak aktarır.
+      </div>
+    </div>
+
+    <!-- Login Form -->
+    <%= form_with url: login_path, method: :post, local: true, style: "display:flex; flex-direction:column; gap: 16px;" do |f| %>
+      <div class="meta-group">
+        <label class="meta-label">Yönetici / Temsilci E-postası</label>
+        <%= f.email_field :email, value: "admin@acme.com", class: "meta-select", required: true, style: "padding: 12px 14px; font-size: 0.9rem;" %>
+      </div>
+
+      <div class="meta-group">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <label class="meta-label" style="margin:0;">Şifre</label>
+          <span style="font-size: 0.72rem; color: var(--text-dim);">(Varsayılan: password123)</span>
+        </div>
+        <%= f.password_field :password, value: "password123", class: "meta-select", required: true, style: "padding: 12px 14px; font-size: 0.9rem;" %>
+      </div>
+
+      <%= f.submit "Giriş Yap →", class: "btn-submit-reply", style: "width: 100%; justify-content: center; padding: 13px; font-size: 0.95rem; font-weight: 800; margin-top: 6px; box-shadow: 0 4px 15px rgba(0, 120, 212, 0.4);" %>
+    <% end %>
+
+    <div style="margin-top: 24px; text-align:center; font-size:0.75rem; color:var(--text-dim);">
+      Giriş bilgisi: <strong>admin@acme.com</strong> / <strong>password123</strong>
+    </div>
+  </div>
+</div>

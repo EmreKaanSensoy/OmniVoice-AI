@@ -1,0 +1,43 @@
+<% content_for :title, "#{@article.title} - Zendesk Guide" %>
+
+<div style="max-width: 860px; margin: 40px auto; padding: 32px; background: var(--bg-card); border: 1px solid var(--bg-card-border); border-radius: var(--radius-xl); backdrop-filter: blur(16px);">
+  <div style="margin-bottom: 24px; border-bottom: 1px solid var(--bg-card-border); padding-bottom: 20px;">
+    <a href="<%= knowledge_articles_path %>" style="color: var(--text-dim); text-decoration:none; font-size: 0.85rem; display:inline-flex; align-items:center; gap:6px; margin-bottom: 12px;">
+      ← Tüm Rehberlere Dön
+    </a>
+
+    <span style="display:inline-block; font-size: 0.75rem; font-weight: 700; color: var(--azure-glow); text-transform:uppercase; margin-bottom: 6px;">
+      <%= @article.category %>
+    </span>
+
+    <h1 style="font-size: 1.6rem; font-weight: 800; color: #fff; margin-bottom: 10px;">
+      <%= @article.title %>
+    </h1>
+
+    <div style="display:flex; align-items:center; gap: 14px; font-size: 0.8rem; color: var(--text-dim);">
+      <span>Yazar: <strong><%= @article.author&.name %></strong></span>
+      <span>•</span>
+      <span>Son Güncelleme: <%= time_ago_in_words(@article.updated_at) %> önce</span>
+      <span>•</span>
+      <span>👁️ <%= @article.views_count %> okuma</span>
+    </div>
+  </div>
+
+  <!-- Body Content -->
+  <div style="font-size: 0.95rem; line-height: 1.8; color: #e2e8f0; white-space: pre-wrap; margin-bottom: 40px;">
+<%= @article.body %>
+  </div>
+
+  <!-- Helpful Vote Box -->
+  <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--bg-card-border); border-radius: var(--radius-lg); padding: 20px; text-align: center;">
+    <h4 style="font-size: 0.9rem; font-weight: 700; color: #fff; margin-bottom: 12px;">Bu makale yardımcı oldu mu?</h4>
+    <div style="display:flex; justify-content:center; gap: 12px;">
+      <button class="btn-softphone-dock" style="cursor:pointer;" onclick="alert('Geri bildiriminiz için teşekkürler!')">
+        👍 Evet (<%= @article.helpful_count %>)
+      </button>
+      <button class="btn-softphone-dock" style="cursor:pointer; color: var(--text-dim); border-color: var(--bg-card-border);" onclick="alert('Geri bildiriminiz için teşekkürler!')">
+        👎 Hayır
+      </button>
+    </div>
+  </div>
+</div>

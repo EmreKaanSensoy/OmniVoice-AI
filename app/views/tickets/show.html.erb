@@ -1,0 +1,464 @@
+<% content_for :title, "Bilet #{@ticket.formatted_number}: #{@ticket.subject}" %>
+
+<div class="ticket-detail-grid">
+  <!-- Left Column: Ticket Properties & Requester Profile -->
+  <aside class="ticket-left-sidebar">
+    <!-- Requester Profile Card -->
+    <div class="requester-card">
+      <div class="requester-avatar">
+        <%= @ticket.requester&.initials || "M" %>
+      </div>
+      <div class="requester-info">
+        <h4><%= @ticket.requester&.name %></h4>
+        <p><%= @ticket.requester&.email %></p>
+        <% if @ticket.requester&.phone.present? %>
+          <p style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--azure-glow);">
+            <%= @ticket.requester.phone %>
+          </p>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Ticket Properties Form -->
+    <%= form_with model: @ticket, url: ticket_path(@ticket), method: :patch, local: true, style: "display:flex; flex-direction:column; gap:16px;" do |f| %>
+      <div class="meta-group">
+        <label class="meta-label">Durum</label>
+        <%= f.select :status, Ticket::STATUSES.map { |s| [s.upcase, s] }, {}, class: "meta-select", onchange: "this.form.submit()" %>
+      </div>
+
+      <div class="meta-group">
+        <label class="meta-label">Öncelik</label>
+        <%= f.select :priority, Ticket::PRIORITIES.map { |p| [p.upcase, p] }, {}, class: "meta-select", onchange: "this.form.submit()" %>
+      </div>
+
+      <div class="meta-group">
+        <label class="meta-label">Atanan Temsilci</label>
+        <%= f.collection_select :assignee_id, @agents, :id, :name, { include_blank: "Atanmamış" }, class: "meta-select", onchange: "this.form.submit()" %>
+      </div>
+
+      <div class="meta-group">
+        <label class="meta-label">Bilet Türü</label>
+        <%= f.select :ticket_type, Ticket::TICKET_TYPES.map { |t| [t.titleize, t] }, {}, class: "meta-select", onchange: "this.form.submit()" %>
+      </div>
+
+      <div class="meta-group">
+        <label class="meta-label">İletişim Kanalı</label>
+        <%= f.select :channel, Ticket::CHANNELS.map { |c| [c.upcase, c] }, {}, class: "meta-select", onchange: "this.form.submit()" %>
+      </div>
+
+      <div class="meta-group">
+        <label class="meta-label">Etiketler (Tags)</label>
+        <%= f.text_field :tags, class: "meta-select", placeholder: "fatura, iade, vip...", onblur: "this.form.submit()" %>
+      </div>
+    <% end %>
+
+    <!-- Call Center Link if applicable -->
+    <% if @related_calls.any? %>
+      <div style="border-top: 1px solid var(--bg-card-border); padding-top: 16px;">
+        <span class="meta-label">Bağlantılı Telefon Görüşmesi</span>
+        <% @related_calls.each do |call| %>
+          <div style="margin-top: 8px; padding: 10px; background: rgba(0, 120, 212, 0.1); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: var(--radius-md);">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:0.8rem; font-weight:700; color:var(--azure-glow);">🎙️ Çağrı Kaydı</span>
+              <span style="font-size:0.75rem; font-family:var(--font-mono); color:var(--text-dim);"><%= call.duration_formatted %></span>
+            </div>
+            <p style="font-size:0.75rem; color:#cbd5e1; margin-top:4px;">
+              Arayan: <%= call.caller_number %>
+            </p>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </aside>
+
+  <!-- Center Column: Conversation Timeline & Reply Composer -->
+  <section class="ticket-center-stage">
+    <!-- Ticket Header Strip -->
+    <div class="ticket-header-strip">
+      <div class="ticket-headline">
+        <h1>
+          <span class="ticket-num-badge"><%= @ticket.formatted_number %></span>
+          <%= @ticket.subject %>
+        </h1>
+        <div class="ticket-meta-tags">
+          <span class="status-pill status-<%= @ticket.status %>"><%= @ticket.status %></span>
+          <span>•</span>
+          <span>Öncelik: <strong style="color:<%= @ticket.priority_color %>;"><%= @ticket.priority.upcase %></strong></span>
+          <span>•</span>
+          <span>Kanal: <%= @ticket.channel.upcase %></span>
+          <span>•</span>
+          <span>Oluşturulma: <%= time_ago_in_words(@ticket.created_at) %> önce</span>
+        </div>
+      </div>
+
+      <!-- Fast Status & Automated Outbound Callback Buttons -->
+      <div style="display:flex; align-items:center; gap: 8px;">
+        <% if @ticket.solved? %>
+          <button type="button" class="btn-softphone-dock" onclick="playResolutionVoiceCall()" title="Yapay zekanın müşteriye telefon aramasında söylediği sesli çözüm mesajını dinleyin" style="cursor:pointer;">
+            🔊 AI Arama Sesini Dinle
+          </button>
+          <%= button_to "📞 Müşteriyi Tekrar Ara", trigger_callback_ticket_path(@ticket), method: :post, class: "btn-sim-call", style: "font-size:0.8rem; padding: 7px 12px;" %>
+          <%= button_to "Bileti Tekrar Aç", update_status_ticket_path(@ticket, status: "open"), method: :patch, class: "btn-submit-reply", style: "background: rgba(239, 68, 68, 0.2); color:#f87171; border: 1px solid rgba(239,68,68,0.4); font-size:0.8rem; padding: 7px 14px;" %>
+        <% else %>
+          <%= button_to "✅ Çöz & Müşteriyi AI ile Geri Ara", update_status_ticket_path(@ticket, status: "solved"), method: :patch, class: "btn-submit-reply", style: "background: var(--emerald-gradient); font-size:0.82rem; padding: 8px 16px; box-shadow: 0 0 15px rgba(16,185,129,0.3); font-weight:700;" %>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Timeline Stream -->
+    <div class="timeline-stream">
+      <!-- Initial Ticket Description Card -->
+      <div class="comment-card">
+        <div class="comment-author-bar">
+          <div class="author-info">
+            <div class="author-avatar" style="background: var(--azure-gradient);">
+              <%= @ticket.requester&.initials || "M" %>
+            </div>
+            <div>
+              <span class="author-name"><%= @ticket.requester&.name %></span>
+              <span style="font-size: 0.72rem; color: var(--text-dim); margin-left: 6px;">(Bilet Açılış Talebi)</span>
+            </div>
+          </div>
+          <span class="comment-time"><%= time_ago_in_words(@ticket.created_at) %> önce</span>
+        </div>
+        <div class="comment-content"><%= @ticket.description %></div>
+      </div>
+
+      <!-- Ticket Comments Stream -->
+      <% @comments.each do |comment| %>
+        <div class="comment-card <%= 'internal-note' if comment.is_internal? %> <%= 'call-log-card' if comment.comment_type == 'call_log' %>">
+          <div class="comment-author-bar">
+            <div class="author-info">
+              <div class="author-avatar" style="<%= comment.is_internal? ? 'background:#d97706;' : '' %>">
+                <%= comment.user&.initials || "S" %>
+              </div>
+              <span class="author-name"><%= comment.user&.name %></span>
+            </div>
+
+            <div style="display:flex; align-items:center; gap: 8px;">
+              <% if comment.is_internal? %>
+                <span class="comment-badge badge-internal">🔒 Dahili Not (Müşteri Göremez)</span>
+              <% end %>
+              <% if comment.comment_type == "call_log" %>
+                <span class="comment-badge badge-call">🎙️ Microsoft AI Çağrı Transkripti</span>
+              <% end %>
+              <span class="comment-time"><%= time_ago_in_words(comment.created_at) %> önce</span>
+            </div>
+          </div>
+          <div class="comment-content"><%= comment.body %></div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Reply Composer (Zendesk-Style Public Reply / Internal Note switcher) -->
+    <div class="reply-composer">
+      <%= form_with model: @new_comment, url: ticket_comments_path(@ticket), local: true do |f| %>
+        <div class="composer-tabs">
+          <button type="button" class="tab-btn active" id="btn-tab-public" onclick="setComposerMode(false)">
+            💬 Müşteriye Yanıt Yaz (Public Reply)
+          </button>
+          <button type="button" class="tab-btn" id="btn-tab-internal" onclick="setComposerMode(true)">
+            🔒 İç Not Ekle (Private Note)
+          </button>
+        </div>
+
+        <input type="hidden" name="ticket_comment[is_internal]" id="is_internal_input" value="false">
+
+        <%= f.text_area :body, id: "comment_body_area", class: "composer-textarea", placeholder: "Müşteriye iletilecek yanıtınızı buraya yazın..." %>
+
+        <div class="composer-footer">
+          <!-- Fast Macro Selector -->
+          <div class="macro-dropdown" style="display:flex; align-items:center; gap:8px;">
+            <label style="font-size:0.75rem; color:var(--text-dim);">Makro Uygula:</label>
+            <select onchange="if(this.value) { document.getElementById('macro_form_' + this.value).submit(); }">
+              <option value="">-- Hazır Şablon Seç --</option>
+              <% @macros.each do |macro| %>
+                <option value="<%= macro.id %>"><%= macro.title %></option>
+              <% end %>
+            </select>
+          </div>
+
+          <!-- Submit Button with Status Selector -->
+          <div style="display:flex; align-items:center; gap: 8px;">
+            <select name="new_status" class="meta-select" style="width: auto; padding: 7px 10px; font-size: 0.8rem;">
+              <option value="open">Gönder (Açık Bırak)</option>
+              <option value="pending">Gönder & Beklemeye Al</option>
+              <option value="solved" selected>Gönder & Çözüldü Yap</option>
+            </select>
+            <%= f.submit "Yanıtı Gönder", class: "btn-submit-reply" %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Hidden Macro Forms for One-Click Application -->
+      <% @macros.each do |macro| %>
+        <%= form_with url: apply_macro_ticket_path(@ticket), method: :post, local: true, id: "macro_form_#{macro.id}", style: "display:none;" do |f| %>
+          <input type="hidden" name="macro_id" value="<%= macro.id %>">
+        <% end %>
+      <% end %>
+    </div>
+  </section>
+
+  <!-- Right Column: Microsoft AI Copilot Assist -->
+  <aside class="ticket-right-copilot">
+    <!-- Copilot Card -->
+    <div class="copilot-card">
+      <div class="copilot-header">
+        <div class="copilot-brand">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+          Microsoft AI Copilot
+        </div>
+        <% if @ticket.ai_sentiment.present? %>
+          <span class="sentiment-badge sentiment-<%= @ticket.ai_sentiment %>">
+            <%= @ticket.ai_sentiment %>
+          </span>
+        <% end %>
+      </div>
+
+      <span class="meta-label" style="margin-bottom: 6px; display:block;">Yapay Zeka Görüşme Özeti</span>
+      <div class="copilot-summary-box">
+        <%= @ticket.ai_summary.presence || "Gelen çağrı veya yazışma transkripti incelenerek otomatik özet üretildi." %>
+      </div>
+
+      <% if @ticket.ai_suggested_action.present? %>
+        <span class="meta-label" style="margin-bottom: 6px; display:block;">Önerilen Takip Aksiyonu</span>
+        <div class="copilot-action-box">
+          <%= @ticket.ai_suggested_action %>
+        </div>
+      <% end %>
+
+      <div style="margin-top: 14px; display:flex; gap: 8px;">
+        <button type="button" class="btn-submit-reply" style="font-size:0.75rem; padding: 6px 12px; width: 100%; justify-content:center; background: var(--copilot-gradient);" onclick="insertAiReplyIntoComposer()">
+          ✨ AI Önerisini Yanıta Ekle
+        </button>
+      </div>
+    </div>
+
+    <!-- Relevant Knowledge Base Articles -->
+    <div style="background: var(--bg-card); border: 1px solid var(--bg-card-border); border-radius: var(--radius-lg); padding: 18px;">
+      <h3 style="font-size: 0.85rem; font-weight: 700; color: #fff; margin-bottom: 12px; display:flex; align-items:center; gap: 6px;">
+        📚 İlgili Çözüm Makaleleri
+      </h3>
+      <div style="display:flex; flex-direction:column; gap: 10px;">
+        <% @suggested_articles.each do |art| %>
+          <a href="<%= knowledge_article_path(art) %>" style="display:block; text-decoration:none; padding: 8px 10px; background: rgba(255,255,255,0.02); border: 1px solid var(--bg-card-border); border-radius: var(--radius-md); transition: all 0.2s ease;">
+            <h5 style="font-size: 0.8rem; font-weight: 600; color: var(--azure-glow);"><%= art.title %></h5>
+            <p style="font-size: 0.72rem; color: var(--text-dim); margin-top: 2px;"><%= art.category %> • <%= art.views_count %> görüntüleme</p>
+          </a>
+        <% end %>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script>
+  function setComposerMode(isInternal) {
+    const input = document.getElementById('is_internal_input');
+    const textarea = document.getElementById('comment_body_area');
+    const btnPublic = document.getElementById('btn-tab-public');
+    const btnInternal = document.getElementById('btn-tab-internal');
+
+    input.value = isInternal ? 'true' : 'false';
+
+    if (isInternal) {
+      btnInternal.classList.add('active');
+      btnPublic.classList.remove('active');
+      textarea.style.background = 'rgba(245, 158, 11, 0.08)';
+      textarea.style.borderColor = 'rgba(245, 158, 11, 0.4)';
+      textarea.placeholder = "Sadece ekip arkadaşlarının görebileceği dahili bir not yazın...";
+    } else {
+      btnPublic.classList.add('active');
+      btnInternal.classList.remove('active');
+      textarea.style.background = 'var(--bg-canvas)';
+      textarea.style.borderColor = 'var(--bg-card-border)';
+      textarea.placeholder = "Müşteriye iletilecek yanıtınızı buraya yazın...";
+    }
+  }
+
+  function insertAiReplyIntoComposer() {
+    const textarea = document.getElementById('comment_body_area');
+    textarea.value = "Sayın <%= @ticket.requester&.name %>,\n\nİlettiğiniz talebi inceledik. <%= @ticket.ai_suggested_action&.split('.')&.first %> Konuyla ilgili gereken işlemleri başlattık. Herhangi bir sorunuz olursa lütfen bize bildirin.\n\nİyi çalışmalar dileriz.";
+    textarea.focus();
+  }
+
+  // Interactive Live AI Outbound Calling Modal with Dual-Tone Phone Ringing
+  let ringAudioContext = null;
+  let ringOsc1 = null;
+  let ringOsc2 = null;
+
+  function startPhoneRingSound() {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      ringAudioContext = new AudioCtx();
+
+      // Standard PSTN Dual Tone Multi-Frequency Ringback Cadence (440Hz + 480Hz)
+      ringOsc1 = ringAudioContext.createOscillator();
+      ringOsc2 = ringAudioContext.createOscillator();
+      const gainNode = ringAudioContext.createGain();
+
+      ringOsc1.frequency.value = 440;
+      ringOsc2.frequency.value = 480;
+
+      // Cadence: 1.5s ring, 2s silence, 1.5s ring
+      gainNode.gain.setValueAtTime(0, ringAudioContext.currentTime);
+      gainNode.gain.setValueAtTime(0.15, ringAudioContext.currentTime + 0.1);
+      gainNode.gain.setValueAtTime(0, ringAudioContext.currentTime + 1.6);
+      gainNode.gain.setValueAtTime(0.15, ringAudioContext.currentTime + 3.0);
+      gainNode.gain.setValueAtTime(0, ringAudioContext.currentTime + 4.5);
+
+      ringOsc1.connect(gainNode);
+      ringOsc2.connect(gainNode);
+      gainNode.connect(ringAudioContext.destination);
+
+      ringOsc1.start();
+      ringOsc2.start();
+    } catch(e) {
+      console.log("AudioContext notice:", e);
+    }
+  }
+
+  function stopPhoneRingSound() {
+    try {
+      if (ringOsc1) { ringOsc1.stop(); ringOsc1.disconnect(); ringOsc1 = null; }
+      if (ringOsc2) { ringOsc2.stop(); ringOsc2.disconnect(); ringOsc2 = null; }
+      if (ringAudioContext) { ringAudioContext.close(); ringAudioContext = null; }
+    } catch(e) {}
+  }
+
+  function playResolutionVoiceCall() {
+    const modal = document.getElementById('outbound-call-modal');
+    const statusLabel = document.getElementById('outbound-status-label');
+    const timerElem = document.getElementById('outbound-call-timer');
+    const waveElem = document.getElementById('outbound-call-wave');
+    const transcriptElem = document.getElementById('outbound-transcript-box');
+    const btnHangup = document.getElementById('btn-outbound-hangup');
+
+    modal.style.display = 'flex';
+    statusLabel.innerHTML = '📞 Numara Çevriliyor... (PSTN Bağlantısı Kuruluyor)';
+    statusLabel.style.color = '#38bdf8';
+    timerElem.innerText = '00:00';
+    waveElem.style.opacity = '0.3';
+    transcriptElem.innerText = "Telefon çalıyor...";
+
+    // 1. Start realistic phone ringing
+    startPhoneRingSound();
+
+    // 2. Customer answers after 2.8 seconds
+    setTimeout(() => {
+      stopPhoneRingSound();
+      statusLabel.innerHTML = '🟢 Çağrı Yanıtlandı (AI Müşteriye Konuşuyor)';
+      statusLabel.style.color = '#34d399';
+      waveElem.style.opacity = '1';
+
+      const customerName = "<%= j @ticket.requester&.name %>";
+      const ticketNumber = "<%= @ticket.formatted_number %>";
+      const actionSummary = "<%= j (@ticket.ai_suggested_action.presence || @ticket.description.to_s.truncate(100)) %>";
+      const text = `Sayın ${customerName}, ${ticketNumber} numaralı destek talebiniz uzman ekibimiz tarafından çözüme kavuşturulmuştur. Çözüm detayınız: ${actionSummary}. Bizi tercih ettiğiniz için teşekkür ederiz.`;
+
+      transcriptElem.innerText = `🤖 AI Bot: "${text}"`;
+
+      // Start timer
+      let sec = 0;
+      const interval = setInterval(() => {
+        sec++;
+        timerElem.innerText = `00:${sec < 10 ? '0' : ''}${sec}`;
+      }, 1000);
+
+      // 3. Turkish AI Speech Synthesis
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'tr-TR';
+        utterance.rate = 0.95;
+
+        utterance.onend = () => {
+          clearInterval(interval);
+          statusLabel.innerHTML = '✅ Arama Başarıyla Tamamlandı (Bilet Kapatıldı)';
+          statusLabel.style.color = '#a78bfa';
+          waveElem.style.opacity = '0.3';
+          btnHangup.innerText = 'Kapat';
+        };
+
+        window.speechSynthesis.speak(utterance);
+      } else {
+        setTimeout(() => {
+          clearInterval(interval);
+          statusLabel.innerHTML = '✅ Arama Başarıyla Tamamlandı';
+          waveElem.style.opacity = '0.3';
+        }, 8000);
+      }
+    }, 2800);
+  }
+
+  function closeOutboundModal() {
+    stopPhoneRingSound();
+    if ('speechSynthesis' in window) { window.speechSynthesis.cancel(); }
+    document.getElementById('outbound-call-modal').style.display = 'none';
+  }
+
+  // Auto-trigger live call modal if redirected with resolution notice
+  document.addEventListener('DOMContentLoaded', () => {
+    const flashNotice = document.querySelector('.flash-notice');
+    if (flashNotice && flashNotice.innerText.includes('otomatik AI sesli geri araması yapıldı')) {
+      setTimeout(() => { playResolutionVoiceCall(); }, 800);
+    }
+  });
+</script>
+
+<!-- Interactive Outbound Voice Call Glassmorphism Modal -->
+<div id="outbound-call-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(2, 6, 23, 0.85); backdrop-filter: blur(8px); z-index:9999; justify-content:center; align-items:center;">
+  <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid rgba(168, 85, 247, 0.5); border-radius: var(--radius-lg); width: 480px; max-width:92%; padding: 28px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); text-align:center; position:relative;">
+    <!-- Live Calling Pulse Badge -->
+    <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(16, 185, 129, 0.15); border:1px solid #10b981; color:#34d399; font-size:0.75rem; font-weight:700; padding:4px 12px; border-radius:var(--radius-full); margin-bottom:16px;">
+      <span style="width:8px; height:8px; border-radius:50%; background:#10b981; animation:pulse-ring 2s infinite;"></span>
+      Microsoft Call Center AI • Canlı Geri Arama
+    </div>
+
+    <!-- Callee Profile Avatar -->
+    <div style="width: 72px; height: 72px; border-radius: 50%; background: var(--copilot-gradient); margin: 0 auto 14px; display:flex; align-items:center; justify-content:center; font-size:2rem; box-shadow: 0 0 25px rgba(168, 85, 247, 0.5);">
+      📞
+    </div>
+
+    <h3 style="font-size: 1.3rem; font-weight: 800; color:#fff; margin-bottom: 4px;">
+      <%= @ticket.requester&.name %>
+    </h3>
+    <div style="font-family: var(--font-mono); font-size: 1.05rem; font-weight:700; color: #38bdf8; margin-bottom: 12px;">
+      <%= @ticket.requester&.phone.presence || "+90 554 720 0828" %>
+    </div>
+
+    <div id="outbound-status-label" style="font-size: 0.85rem; font-weight: 700; color: #38bdf8; margin-bottom: 12px; transition: all 0.3s ease;">
+      📞 Numara Çevriliyor...
+    </div>
+
+    <!-- Call Duration Timer -->
+    <div id="outbound-call-timer" style="font-size: 1.8rem; font-family: var(--font-mono); font-weight: 800; color: #f1f5f9; letter-spacing: 0.05em; margin-bottom: 14px;">
+      00:00
+    </div>
+
+    <!-- Animated Equalizer Waveform -->
+    <div id="outbound-call-wave" class="audio-visualizer-wave" style="margin-bottom: 18px; opacity:0.3; transition:opacity 0.3s ease;">
+      <div class="wave-bar"></div>
+      <div class="wave-bar"></div>
+      <div class="wave-bar"></div>
+      <div class="wave-bar"></div>
+      <div class="wave-bar"></div>
+      <div class="wave-bar"></div>
+    </div>
+
+    <!-- Real-time Spoken Transcript Box -->
+    <div id="outbound-transcript-box" style="background: rgba(15, 23, 42, 0.8); border: 1px solid var(--bg-card-border); border-radius: var(--radius-md); padding: 12px 14px; font-size: 0.8rem; color: #cbd5e1; text-align: left; line-height: 1.4; margin-bottom: 20px; max-height: 100px; overflow-y:auto; font-style: italic;">
+      Bağlantı kuruluyor...
+    </div>
+
+    <!-- Control Buttons -->
+    <div style="display:flex; justify-content:center; gap: 10px;">
+      <button type="button" class="btn-submit-reply" onclick="playResolutionVoiceCall()" style="background: rgba(255,255,255,0.08); border:1px solid var(--bg-card-border); font-size:0.85rem; padding: 10px 18px;">
+        🔄 Tekrar Ara
+      </button>
+      <button type="button" id="btn-outbound-hangup" class="btn-submit-reply" onclick="closeOutboundModal()" style="background: #ef4444; color:#fff; font-size:0.85rem; padding: 10px 24px; font-weight:700;">
+        🔴 Çağrıyı Kapat
+      </button>
+    </div>
+  </div>
+</div>
